@@ -96,10 +96,10 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 	otpCode := util.GenerateRandomNumber(4)
 	referenceId := util.GenerateRandomString(16)
 
-	_ = s.emailService.Send(req.Email, "OTP Code", "Your OTP Code are: "+otpCode)
-	// if err != nil {
-	// 	return dto.UserRegisterRes{}, err
-	// }
+	err = s.emailService.Send(req.Email, "OTP Code", "Your OTP Code are: "+otpCode)
+	if err != nil {
+		return dto.UserRegisterRes{}, err
+	}
 
 	err = s.repository.Insert(ctx, &user)
 	if err != nil {

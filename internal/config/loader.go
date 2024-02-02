@@ -26,8 +26,10 @@ func Get() *Config {
 			Name:     os.Getenv("DATABASE_NAME"),
 		},
 		Mail: Email{
-			User: os.Getenv("MAIL_USER"),
-			API:  os.Getenv("MAIL_API"),
+			Host:     os.Getenv("MAIL_HOST"),
+			Port:     os.Getenv("MAIL_PORT"),
+			User:     os.Getenv("MAIL_USER"),
+			Password: os.Getenv("MAIL_PASSWORD"),
 		},
 	}
 }

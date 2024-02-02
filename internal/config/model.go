@@ -20,6 +20,8 @@ type Database struct {
 }
 
 type Email struct {
-	User string
-	API  string
+	Host     string
+	Port     string
+	User     string
+	Password string
 }
