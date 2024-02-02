@@ -21,7 +21,7 @@ func (s *emailService) Send(to, subject, body string) error {
 	client := resend.NewClient(s.config.Mail.API)
 
 	params := &resend.SendEmailRequest{
-		From:    "delivered@resend.dev",
+		From:    "reyhan@resend.dev",
 		To:      []string{to},
 		Subject: subject,
 		Html:    body,

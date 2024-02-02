@@ -49,7 +49,7 @@ func (handler *authApi) RegisterUser(ctx *fiber.Ctx) error {
 
 	res, err := handler.userService.Register(ctx.Context(), req)
 	if err != nil {
-		return ctx.Status(util.GetHttpStatus(err)).JSON(err)
+		return ctx.Status(util.GetHttpStatus(err)).SendString(err.Error())
 	}
 	return ctx.Status(200).JSON(res)
 }
