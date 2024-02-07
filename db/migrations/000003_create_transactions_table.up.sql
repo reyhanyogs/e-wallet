@@ -4,7 +4,7 @@ CREATE TABLE "transactions" (
   "dof_number" varchar(100) NOT NULL,
   "amount" numeric(19,2),
   "transaction_type" varchar(1),
-  "account_id" int NOT NULL,
+  "account_id" bigint NOT NULL,
   "transaction_datetime" timestamp
 );
 
