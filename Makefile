@@ -7,10 +7,16 @@ createdb:
 dropdb: 
 	docker exec -it e-wallet-postgres dropdb e-wallet
 
+redisinit:
+	docker run --name e-wallet-redis -p 6378:6379 -d redis:7.2-alpine
+
+redis:
+	docker exec -it e-wallet-redis redis-cli
+
 migrateup:
 	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5434/e-wallet?sslmode=disable" -verbose up
 
 migratedown:
 	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5434/e-wallet?sslmode=disable" -verbose down
 
-.PHONY: postgresinit createdb dropdb migrateup migratedown
+.PHONY: postgresinit createdb dropdb redisinit redis migrateup migratedown

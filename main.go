@@ -13,7 +13,7 @@ import (
 func main() {
 	config := config.Get()
 	dbConnection := component.GetDatabaseConn(config)
-	cacheConnection := component.GetCacheConnection()
+	cacheConnection := repository.NewRedisClient(config)
 
 	userRepository := repository.NewUser(dbConnection)
 	accountRepository := repository.NewAccount(dbConnection)
