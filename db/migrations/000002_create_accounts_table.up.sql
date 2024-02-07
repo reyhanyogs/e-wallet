@@ -1,6 +1,6 @@
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
-  "user_id" int NOT NULL,
+  "user_id" bigint NOT NULL,
   "account_number" varchar(100),
   "balance" numeric(19,2)
 );
