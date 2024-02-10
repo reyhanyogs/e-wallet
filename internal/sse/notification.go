@@ -28,12 +28,12 @@ func (h *notificationSse) StreamNotification(ctx *fiber.Ctx) error {
 
 	ctx.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
 		event := fmt.Sprintf("event: %s\n"+"data: \n\n", "initial")
-		_, _ = fmt.Fprintf(w, event)
+		_, _ = fmt.Fprint(w, event)
 		_ = w.Flush()
 		for notification := range h.hub.NotificationChannel[user.ID] {
 			data, _ := json.Marshal(notification)
 			event = fmt.Sprintf("event: %s\n"+"data: %s\n\n", "notification-updated", data)
-			_, _ = fmt.Fprintf(w, event)
+			_, _ = fmt.Fprint(w, event)
 			_ = w.Flush()
 		}
 	})
