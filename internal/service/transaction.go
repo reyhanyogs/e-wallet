@@ -12,26 +12,23 @@ import (
 )
 
 type transactionService struct {
-	accountRepository      domain.AccountRepository
-	transactionRepository  domain.TransactionRepository
-	cacheRepository        domain.CacheRepository
-	notificationRepository domain.NotificationRepository
-	hub                    *dto.Hub
+	accountRepository     domain.AccountRepository
+	transactionRepository domain.TransactionRepository
+	cacheRepository       domain.CacheRepository
+	notificationService   domain.NotificationService
 }
 
 func NewTransaction(
 	accountRepository domain.AccountRepository,
 	transactionRepository domain.TransactionRepository,
 	cacheRepository domain.CacheRepository,
-	notificationRepository domain.NotificationRepository,
-	hub *dto.Hub,
+	notificationService domain.NotificationService,
 ) domain.TransactionService {
 	return &transactionService{
-		accountRepository:      accountRepository,
-		transactionRepository:  transactionRepository,
-		cacheRepository:        cacheRepository,
-		notificationRepository: notificationRepository,
-		hub:                    hub,
+		accountRepository:     accountRepository,
+		transactionRepository: transactionRepository,
+		cacheRepository:       cacheRepository,
+		notificationService:   notificationService,
 	}
 }
 
@@ -134,44 +131,10 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 }
 
 func (s *transactionService) notificationAfterTransfer(sofAccount domain.Account, dofAccount domain.Account, amount float64) {
-	notificationSender := domain.Notification{
-		UserID:    sofAccount.UserId,
-		Title:     "Transfer berhasil",
-		Body:      fmt.Sprintf("Transfer senilai %.2f berhasil", amount),
-		IsRead:    0,
-		Status:    1,
-		CreatedAt: time.Now(),
-	}
-	notificationReceiver := domain.Notification{
-		UserID:    dofAccount.UserId,
-		Title:     "Dana diterima",
-		Body:      fmt.Sprintf("Dana diterima senilai %.2f", amount),
-		IsRead:    0,
-		Status:    1,
-		CreatedAt: time.Now(),
+	data := map[string]string{
+		"amount": fmt.Sprintf("%.2f", amount),
 	}
 
-	_ = s.notificationRepository.Insert(context.Background(), &notificationSender)
-	if channel, ok := s.hub.NotificationChannel[sofAccount.UserId]; ok {
-		channel <- dto.NotificationData{
-			ID:        notificationSender.ID,
-			Title:     notificationSender.Title,
-			Body:      notificationSender.Body,
-			Status:    notificationSender.Status,
-			IsRead:    notificationSender.IsRead,
-			CreatedAt: notificationSender.CreatedAt,
-		}
-	}
-
-	_ = s.notificationRepository.Insert(context.Background(), &notificationReceiver)
-	if channel, ok := s.hub.NotificationChannel[dofAccount.UserId]; ok {
-		channel <- dto.NotificationData{
-			ID:        notificationReceiver.ID,
-			Title:     notificationReceiver.Title,
-			Body:      notificationReceiver.Body,
-			Status:    notificationReceiver.Status,
-			IsRead:    notificationReceiver.IsRead,
-			CreatedAt: notificationReceiver.CreatedAt,
-		}
-	}
+	_ = s.notificationService.Insert(context.Background(), sofAccount.ID, "TRANSFER", data)
+	_ = s.notificationService.Insert(context.Background(), dofAccount.ID, "TRANSFER_DEST", data)
 }
