@@ -33,7 +33,7 @@ func main() {
 	notificationService := service.NewNotification(notificationRepository, templateRepository, hub)
 	transactionService := service.NewTransaction(accountRepository, transactionRepository, cacheConnection, notificationService)
 	midtransService := service.NewMidtrans(config)
-	topUpService := service.NewTopUp(notificationService, midtransService, topUpRepository, accountRepository)
+	topUpService := service.NewTopUp(notificationService, midtransService, topUpRepository, accountRepository, transactionRepository)
 
 	authMiddleware := middleware.Authenticate(userService)
 

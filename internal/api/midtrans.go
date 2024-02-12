@@ -35,7 +35,7 @@ func (h *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
 		})
 	}
 
-	success, err := h.midtransService.VerifyPayment(ctx.Context(), payload)
+	success, err := h.midtransService.VerifyPayment(ctx.Context(), orderId)
 	if err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
 			Message: err.Error(),

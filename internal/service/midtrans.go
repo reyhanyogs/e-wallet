@@ -11,21 +11,19 @@ import (
 )
 
 type midTransService struct {
-	client         snap.Client
-	midTransConfig config.Midtrans
+	config config.Midtrans
+	env    midtrans.EnvironmentType
 }
 
 func NewMidtrans(config *config.Config) domain.MidTransService {
-	var client snap.Client
 	env := midtrans.Sandbox
 	if config.Midtrans.IsProd {
 		env = midtrans.Production
 	}
-	client.New(config.Midtrans.Key, env)
 
 	return &midTransService{
-		client:         client,
-		midTransConfig: config.Midtrans,
+		config: config.Midtrans,
+		env:    env,
 	}
 }
 
@@ -37,7 +35,10 @@ func (s *midTransService) GenerateSnapURL(ctx context.Context, t *domain.TopUp) 
 		},
 	}
 
-	snapResp, err := s.client.CreateTransaction(req)
+	var client snap.Client
+	client.New(s.config.Key, s.env)
+
+	snapResp, err := client.CreateTransaction(req)
 	if err != nil {
 		return err
 	}
@@ -45,19 +46,9 @@ func (s *midTransService) GenerateSnapURL(ctx context.Context, t *domain.TopUp) 
 	return nil
 }
 
-func (s *midTransService) VerifyPayment(ctx context.Context, data map[string]interface{}) (bool, error) {
+func (s *midTransService) VerifyPayment(ctx context.Context, orderId string) (bool, error) {
 	var client coreapi.Client
-	env := midtrans.Sandbox
-	if s.midTransConfig.IsProd {
-		env = midtrans.Production
-	}
-	client.New(s.midTransConfig.Key, env)
-
-	// Check if order_id exist in payload
-	orderId, exists := data["order_id"].(string)
-	if !exists {
-		return false, domain.ErrInvalidPayload
-	}
+	client.New(s.config.Key, s.env)
 
 	// Check transaction to Midtrans with param order_id
 	transactionStatusResp, err := client.CheckTransaction(orderId)

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/reyhanyogs/e-wallet/domain"
@@ -10,10 +11,11 @@ import (
 )
 
 type topUpService struct {
-	notificationService domain.NotificationService
-	midTransService     domain.MidTransService
-	topUpRepository     domain.TopUpRepository
-	accountRepository   domain.AccountRepository
+	notificationService   domain.NotificationService
+	midTransService       domain.MidTransService
+	topUpRepository       domain.TopUpRepository
+	accountRepository     domain.AccountRepository
+	transactionRepository domain.TransactionRepository
 }
 
 func NewTopUp(
@@ -21,12 +23,14 @@ func NewTopUp(
 	midtransService domain.MidTransService,
 	topUpRepository domain.TopUpRepository,
 	accountRepository domain.AccountRepository,
+	transactionRepository domain.TransactionRepository,
 ) domain.TopUpService {
 	return &topUpService{
-		notificationService: notificationService,
-		midTransService:     midtransService,
-		topUpRepository:     topUpRepository,
-		accountRepository:   accountRepository,
+		notificationService:   notificationService,
+		midTransService:       midtransService,
+		topUpRepository:       topUpRepository,
+		accountRepository:     accountRepository,
+		transactionRepository: transactionRepository,
 	}
 }
 
@@ -69,6 +73,18 @@ func (s *topUpService) ConfirmedTopUp(ctx context.Context, id string) error {
 		return domain.ErrAccountNotFound
 	}
 
+	err = s.transactionRepository.Insert(ctx, &domain.Transaction{
+		AccountId:           account.ID,
+		SofNumber:           "00",
+		DofNumber:           account.AccountNumber,
+		TransactionType:     "C",
+		Amount:              float64(topUp.Amount),
+		TransactionDatetime: time.Now(),
+	})
+	if err != nil {
+		return err
+	}
+
 	account.Balance += float64(topUp.Amount)
 	err = s.accountRepository.Update(ctx, &account)
 	if err != nil {
@@ -76,7 +92,7 @@ func (s *topUpService) ConfirmedTopUp(ctx context.Context, id string) error {
 	}
 
 	data := map[string]string{
-		"amount": fmt.Sprintf("%.2f", topUp.Amount),
+		"amount": fmt.Sprintf("%d", topUp.Amount),
 	}
 	_ = s.notificationService.Insert(ctx, account.UserId, "TOPUP_SUCCESS", data)
 
