@@ -12,16 +12,18 @@ import (
 )
 
 type userService struct {
-	repository      domain.UserRepository
-	cacheRepository domain.CacheRepository
-	emailService    domain.EmailService
+	repository       domain.UserRepository
+	cacheRepository  domain.CacheRepository
+	emailService     domain.EmailService
+	factorRepository domain.FactorRepository
 }
 
-func NewUser(repository domain.UserRepository, cacheRepository domain.CacheRepository, emailService domain.EmailService) domain.UserService {
+func NewUser(repository domain.UserRepository, cacheRepository domain.CacheRepository, emailService domain.EmailService, factorRepository domain.FactorRepository) domain.UserService {
 	return &userService{
-		repository:      repository,
-		cacheRepository: cacheRepository,
-		emailService:    emailService,
+		repository:       repository,
+		cacheRepository:  cacheRepository,
+		emailService:     emailService,
+		factorRepository: factorRepository,
 	}
 }
 
@@ -84,6 +86,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 	}
 
 	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
+	hashedPIN, _ := bcrypt.GenerateFromPassword([]byte(req.PIN), 12)
 
 	user := domain.User{
 		FullName: req.FullName,
@@ -102,6 +105,16 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 	}
 
 	err = s.repository.Insert(ctx, &user)
+	if err != nil {
+		return dto.UserRegisterRes{}, err
+	}
+
+	factor := domain.Factor{
+		UserID: user.ID,
+		PIN:    string(hashedPIN),
+	}
+
+	err = s.factorRepository.Insert(ctx, &factor)
 	if err != nil {
 		return dto.UserRegisterRes{}, err
 	}
