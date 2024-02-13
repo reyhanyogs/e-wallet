@@ -62,6 +62,8 @@ func (s *midTransService) VerifyPayment(ctx context.Context, orderId string) (bo
 				if transactionStatusResp.FraudStatus == "accept" {
 					return true, nil
 				}
+			} else if transactionStatusResp.TransactionStatus == "pending" {
+				// set db status to pending
 			}
 		}
 	}

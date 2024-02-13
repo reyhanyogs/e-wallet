@@ -42,7 +42,7 @@ func (h *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
 		})
 	}
 	if !success {
-		return ctx.SendStatus(400)
+		return ctx.SendStatus(500)
 	}
 
 	err = h.topUpService.ConfirmedTopUp(ctx.Context(), orderId)
