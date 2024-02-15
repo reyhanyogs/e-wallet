@@ -50,7 +50,8 @@ func (s *userService) Authenticate(ctx context.Context, req dto.AuthReq) (dto.Au
 	userJson, _ := json.Marshal(user)
 	_ = s.cacheRepository.Set("user:"+token, userJson)
 	return dto.AuthRes{
-		Token: token,
+		UserId: user.ID,
+		Token:  token,
 	}, nil
 }
 

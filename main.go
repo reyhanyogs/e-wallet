@@ -28,6 +28,7 @@ func main() {
 	templateRepository := repository.NewTemplate(dbConnection)
 	topUpRepository := repository.NewTopUp(dbConnection)
 	factorRepository := repository.NewFactor(dbConnection)
+	loginLogRepository := repository.NewLoginLog(dbConnection)
 
 	emailService := service.NewEmail(config)
 	userService := service.NewUser(userRepository, cacheConnection, emailService, factorRepository)
@@ -36,12 +37,14 @@ func main() {
 	midtransService := service.NewMidtrans(config)
 	topUpService := service.NewTopUp(notificationService, midtransService, topUpRepository, accountRepository, transactionRepository)
 	factorService := service.NewFactor(factorRepository)
+	ipCheckerService := service.NewIpChecker()
+	fdsService := service.NewFds(ipCheckerService, loginLogRepository)
 
 	authMiddleware := middleware.Authenticate(userService)
 
 	app := fiber.New()
 
-	api.NewAuth(app, userService, authMiddleware)
+	api.NewAuth(app, userService, authMiddleware, fdsService)
 	api.NewTransfer(app, authMiddleware, transactionService, factorService)
 	api.NewNotification(app, authMiddleware, notificationService)
 	api.NewTopUp(app, authMiddleware, topUpService)
