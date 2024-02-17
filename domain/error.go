@@ -4,6 +4,8 @@ import "errors"
 
 var ErrAuthFailed = errors.New("error authentication failed")
 var ErrUsernameTaken = errors.New("username already taken")
+var ErrOtpNotFound = errors.New("otp not found")
+var ErrUsernameNotFound = errors.New("username not found")
 var ErrOtpInvalid = errors.New("otp invalid")
 var ErrAccountNotFound = errors.New("account not found")
 var ErrInquiryNotFound = errors.New("inquiry not found")

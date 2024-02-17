@@ -11,6 +11,7 @@ var Log = initializeLogger()
 
 func initializeLogger() *logrus.Logger {
 	log := logrus.New()
+	log.SetLevel(logrus.InfoLevel)
 	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		os.Exit(1)

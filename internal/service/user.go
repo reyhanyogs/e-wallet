@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/reyhanyogs/e-wallet/domain"
 	"github.com/reyhanyogs/e-wallet/dto"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 	"github.com/reyhanyogs/e-wallet/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -130,7 +132,8 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 func (s *userService) ValidateOTP(ctx context.Context, req dto.ValidateOtpReq) error {
 	data, err := s.cacheRepository.Get("otp:" + req.ReferenceID)
 	if err != nil {
-		return domain.ErrOtpInvalid
+		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
+		return domain.ErrOtpNotFound
 	}
 
 	otp := string(data)
@@ -140,10 +143,12 @@ func (s *userService) ValidateOTP(ctx context.Context, req dto.ValidateOtpReq) e
 
 	data, err = s.cacheRepository.Get("user-ref:" + req.ReferenceID)
 	if err != nil {
-		return domain.ErrOtpInvalid
+		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
+		return domain.ErrUsernameNotFound
 	}
 	user, err := s.repository.FindByUsername(ctx, string(data))
 	if err != nil {
+		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
 		return err
 	}
 

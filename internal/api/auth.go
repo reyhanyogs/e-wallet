@@ -27,12 +27,16 @@ func NewAuth(app *fiber.App, userService domain.UserService, authMid fiber.Handl
 func (handler *authApi) GenerateToken(ctx *fiber.Ctx) error {
 	var req dto.AuthReq
 	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.SendStatus(400)
+		return ctx.Status(400).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 
 	token, err := handler.userService.Authenticate(ctx.Context(), req)
 	if err != nil {
-		return ctx.SendStatus(util.GetHttpStatus(err))
+		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 
 	if !handler.fdsService.IsAuthorized(ctx.Context(), ctx.Get("X-Forwarded-For"), token.UserId) {
@@ -63,12 +67,16 @@ func (handler *authApi) RegisterUser(ctx *fiber.Ctx) error {
 func (handler *authApi) ValidateOTP(ctx *fiber.Ctx) error {
 	var req dto.ValidateOtpReq
 	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.SendStatus(400)
+		return ctx.Status(400).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 
 	err := handler.userService.ValidateOTP(ctx.Context(), req)
 	if err != nil {
-		return ctx.SendStatus(util.GetHttpStatus(err))
+		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 	return ctx.SendStatus(200)
 }
