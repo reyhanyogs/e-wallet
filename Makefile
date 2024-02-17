@@ -13,10 +13,13 @@ redisinit:
 redis:
 	docker exec -it e-wallet-redis redis-cli
 
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)
+
 migrateup:
 	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5434/e-wallet?sslmode=disable" -verbose up
 
 migratedown:
 	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5434/e-wallet?sslmode=disable" -verbose down
 
-.PHONY: postgresinit createdb dropdb redisinit redis migrateup migratedown
+.PHONY: postgresinit createdb dropdb redisinit redis new_migration migrateup migratedown
