@@ -22,4 +22,10 @@ migrateup:
 migratedown:
 	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5434/e-wallet?sslmode=disable" -verbose down
 
-.PHONY: postgresinit createdb dropdb redisinit redis new_migration migrateup migratedown
+composeup:
+	docker compose up
+
+composedown:
+	docker compose down
+
+.PHONY: postgresinit createdb dropdb redisinit redis new_migration migrateup migratedown composeup composedown
