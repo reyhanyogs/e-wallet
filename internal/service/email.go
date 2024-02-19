@@ -1,89 +1,34 @@
 package service
 
 import (
-	"crypto/tls"
-	"fmt"
-	"net"
-	"net/mail"
-	"net/smtp"
+	"encoding/json"
 
 	"github.com/reyhanyogs/e-wallet/domain"
-	"github.com/reyhanyogs/e-wallet/internal/config"
+	"github.com/reyhanyogs/e-wallet/dto"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 )
 
 type emailService struct {
-	config *config.Config
+	queueService domain.QueueService
 }
 
-func NewEmail(config *config.Config) domain.EmailService {
+func NewEmail(queueService domain.QueueService) domain.EmailService {
 	return &emailService{
-		config: config,
+		queueService: queueService,
 	}
 }
 
 func (s *emailService) Send(to, subject, body string) error {
-	from := mail.Address{"", s.config.Mail.User}
-	toMail := mail.Address{"", to}
-
-	// Setup Headers
-	headers := make(map[string]string)
-	headers["From"] = from.String()
-	headers["To"] = toMail.String()
-	headers["Subject"] = subject
-
-	// Setup Message
-	message := ""
-	for k, v := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	payload := dto.SendEmailReq{
+		To:      to,
+		Subject: subject,
+		Body:    body,
 	}
-	message += "\r\n" + body
-
-	// Connect to the SMTP Server
-	servername := s.config.Mail.Host + ":" + s.config.Mail.Port
-
-	host, _, _ := net.SplitHostPort(servername)
-	auth := smtp.PlainAuth("", s.config.Mail.User, s.config.Mail.Password, host)
-
-	// TLS Config
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         host,
-	}
-
-	conn, err := tls.Dial("tcp", servername, tlsConfig)
+	data, err := json.Marshal(payload)
 	if err != nil {
+		component.Log.Errorf("Send: %s", err.Error())
 		return err
 	}
 
-	c, err := smtp.NewClient(conn, host)
-	if err != nil {
-		return err
-	}
-
-	// Auth
-	if err = c.Auth(auth); err != nil {
-		return err
-	}
-
-	// From & To
-	if err = c.Mail(from.Address); err != nil {
-		return err
-	}
-
-	if err = c.Rcpt(toMail.Address); err != nil {
-		return err
-	}
-
-	// Data
-	w, err := c.Data()
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write([]byte(message))
-	if err != nil {
-		return err
-	}
-
-	return w.Close()
+	return s.queueService.Enqueue("send:email", data, 3)
 }
