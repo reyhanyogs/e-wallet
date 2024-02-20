@@ -11,12 +11,13 @@ FROM alpine:3.19
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate ./migrate
-COPY .env .
+COPY main.env .
 COPY start.sh .
 COPY db/migrations ./db/migrations
 COPY wait-for .
 RUN chmod a+x start.sh
 RUN chmod a+x wait-for
+RUN mkdir logs
 
 EXPOSE 8080
 CMD ["/app/main"]

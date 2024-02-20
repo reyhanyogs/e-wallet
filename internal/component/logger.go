@@ -12,8 +12,9 @@ var Log = initializeLogger()
 func initializeLogger() *logrus.Logger {
 	log := logrus.New()
 	log.SetLevel(logrus.InfoLevel)
-	file, err := os.OpenFile("e-wallet-main.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("logs/e-wallet-main.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
+		log.Println("Error Open File: ", err)
 		os.Exit(1)
 	}
 
