@@ -7,6 +7,7 @@ import (
 	"github.com/midtrans/midtrans-go/coreapi"
 	"github.com/midtrans/midtrans-go/snap"
 	"github.com/reyhanyogs/e-wallet/domain"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 	"github.com/reyhanyogs/e-wallet/internal/config"
 )
 
@@ -40,6 +41,7 @@ func (s *midTransService) GenerateSnapURL(ctx context.Context, t *domain.TopUp) 
 
 	snapResp, err := client.CreateTransaction(req)
 	if err != nil {
+		component.Log.Errorf("GenerateSnapURL(CreateTransaction): user_id = %d: err = %s", t.UserID, err)
 		return err
 	}
 	t.SnapURL = snapResp.RedirectURL
@@ -53,6 +55,7 @@ func (s *midTransService) VerifyPayment(ctx context.Context, orderId string) (bo
 	// Check transaction to Midtrans with param order_id
 	transactionStatusResp, err := client.CheckTransaction(orderId)
 	if err != nil {
+		component.Log.Errorf("VerifyPayment(CheckTransaction): orderId = %s: err = %s", orderId, err)
 		return false, err
 	} else {
 		if transactionStatusResp != nil {

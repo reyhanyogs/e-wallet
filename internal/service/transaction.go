@@ -8,6 +8,7 @@ import (
 
 	"github.com/reyhanyogs/e-wallet/domain"
 	"github.com/reyhanyogs/e-wallet/dto"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 	"github.com/reyhanyogs/e-wallet/internal/util"
 )
 
@@ -36,6 +37,7 @@ func (s *transactionService) TransferInquiry(ctx context.Context, req dto.Transf
 	user := ctx.Value("x-user").(dto.UserData)
 	myAccount, err := s.accountRepository.FindByUserID(ctx, user.ID)
 	if err != nil {
+		component.Log.Errorf("TransferInquiry(FindByUserID): user_id = %d: err = %s", user.ID, err.Error())
 		return dto.TransferInquiryRes{}, err
 	}
 
@@ -45,6 +47,7 @@ func (s *transactionService) TransferInquiry(ctx context.Context, req dto.Transf
 
 	dofAccount, err := s.accountRepository.FindByAccountNumber(ctx, req.AccountNumber)
 	if err != nil {
+		component.Log.Errorf("TransferInquiry(FindByAccountNumber): user_id = %d: err = %s", user.ID, err.Error())
 		return dto.TransferInquiryRes{}, err
 	}
 
@@ -85,6 +88,7 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 
 	dofAccount, err := s.accountRepository.FindByAccountNumber(ctx, reqInq.AccountNumber)
 	if err != nil {
+		component.Log.Errorf("TransferExecute(FindByAccountNumber): user_id = %d: err = %s", dofAccount.ID, err.Error())
 		return err
 	}
 
@@ -98,6 +102,7 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 	}
 	err = s.transactionRepository.Insert(ctx, &debitTransaction)
 	if err != nil {
+		component.Log.Errorf("TransferExecute(Insert): user_id = %d: err = %s", debitTransaction.ID, err.Error())
 		return err
 	}
 
@@ -111,18 +116,21 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 	}
 	err = s.transactionRepository.Insert(ctx, &creditTransaction)
 	if err != nil {
+		component.Log.Errorf("TransferExecute(Insert): user_id = %d: err = %s", creditTransaction.ID, err.Error())
 		return err
 	}
 
 	myAccount.Balance -= reqInq.Amount
 	err = s.accountRepository.Update(ctx, &myAccount)
 	if err != nil {
+		component.Log.Errorf("TransferExecute(Update): user_id = %d: err = %s", myAccount.ID, err.Error())
 		return err
 	}
 
 	dofAccount.Balance += reqInq.Amount
 	err = s.accountRepository.Update(ctx, &dofAccount)
 	if err != nil {
+		component.Log.Errorf("TransferExecute(Update): user_id = %d: err = %s", dofAccount.ID, err.Error())
 		return err
 	}
 

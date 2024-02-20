@@ -26,8 +26,8 @@ func (s *queueService) Enqueue(name string, data []byte, retry int) error {
 
 	info, err := s.queueClient.Enqueue(task)
 	if err != nil {
-		component.Log.Errorf("Enqueue; %s", err.Error())
+		component.Log.Errorf("Enqueue(Enqueue): task_ID = %s: err = %s", info.ID, err.Error())
 	}
-	component.Log.Info("Enqueue; ", info.Payload)
+	component.Log.Info("Enqueue with task ID =  ", info.ID)
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/reyhanyogs/e-wallet/domain"
 	"github.com/reyhanyogs/e-wallet/dto"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 )
 
 type notificationService struct {
@@ -27,6 +28,7 @@ func NewNotification(notificationRepository domain.NotificationRepository, templ
 func (s *notificationService) FindByUser(ctx context.Context, user int64) ([]dto.NotificationData, error) {
 	notifications, err := s.notificationRepository.FindByUser(ctx, user)
 	if err != nil {
+		component.Log.Errorf("FindByUser(FindByUser): user_id = %d: err = %s", user, err.Error())
 		return nil, err
 	}
 
@@ -45,12 +47,13 @@ func (s *notificationService) FindByUser(ctx context.Context, user int64) ([]dto
 		result = make([]dto.NotificationData, 0)
 	}
 
-	return result, err
+	return result, nil
 }
 
 func (s *notificationService) Insert(ctx context.Context, userId int64, code string, data map[string]string) error {
 	tmpl, err := s.templateRepository.FindByCode(ctx, code)
 	if err != nil {
+		component.Log.Errorf("Insert(FindByCode): user_id = %d: err = %s", userId, err.Error())
 		return err
 	}
 	if tmpl == (domain.Template{}) {
@@ -61,6 +64,7 @@ func (s *notificationService) Insert(ctx context.Context, userId int64, code str
 	t := template.Must(template.New("notif").Parse(tmpl.Body))
 	err = t.Execute(body, data)
 	if err != nil {
+		component.Log.Errorf("Insert(Execute): user_id = %d: err = %s", userId, err.Error())
 		return err
 	}
 
@@ -74,6 +78,7 @@ func (s *notificationService) Insert(ctx context.Context, userId int64, code str
 	}
 	err = s.notificationRepository.Insert(ctx, &notification)
 	if err != nil {
+		component.Log.Errorf("Insert(Insert): user_id = %d: err = %s", userId, err.Error())
 		return err
 	}
 

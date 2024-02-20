@@ -7,6 +7,7 @@ import (
 
 	"github.com/reyhanyogs/e-wallet/domain"
 	"github.com/reyhanyogs/e-wallet/dto"
+	"github.com/reyhanyogs/e-wallet/internal/component"
 	"github.com/reyhanyogs/e-wallet/internal/util"
 )
 
@@ -25,6 +26,7 @@ func NewFds(ipCheckerService domain.IpCheckerService, loginLogRepository domain.
 func (s *fdsService) IsAuthorized(ctx context.Context, ip string, userId int64) bool {
 	locationCheck, err := s.ipCheckerService.Query(ctx, ip)
 	if err != nil || locationCheck == (dto.IpChecker{}) {
+		component.Log.Errorf("IsAuthorized(Query): user_id = %d: err = %s", userId, err.Error())
 		return false
 	}
 
@@ -40,6 +42,7 @@ func (s *fdsService) IsAuthorized(ctx context.Context, ip string, userId int64) 
 
 	lastLogin, err := s.loginLogRepository.FindLastAuthorized(ctx, userId)
 	if err != nil {
+		component.Log.Errorf("IsAuthorized(FindLastAuthorized): user_id = %d: err = %s", userId, err.Error())
 		_ = s.loginLogRepository.Save(ctx, &newAccess)
 		return false
 	}

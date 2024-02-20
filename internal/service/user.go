@@ -40,6 +40,7 @@ func NewUser(
 func (s *userService) Authenticate(ctx context.Context, req dto.AuthReq) (dto.AuthRes, error) {
 	user, err := s.repository.FindByUsername(ctx, req.Username)
 	if err != nil {
+		component.Log.Errorf("Authenticate(FindByUsername): username = %s: err = %s", req.Username, err.Error())
 		return dto.AuthRes{}, err
 	}
 	if user == (domain.User{}) {
@@ -68,6 +69,7 @@ func (s *userService) Authenticate(ctx context.Context, req dto.AuthReq) (dto.Au
 func (s *userService) ValidateToken(ctx context.Context, token string) (dto.UserData, error) {
 	data, err := s.cacheRepository.Get("user:" + token)
 	if err != nil {
+		component.Log.Errorf("ValidateToken(Get): token = %s: err = %s", token, err.Error())
 		return dto.UserData{}, err
 	}
 
@@ -75,6 +77,7 @@ func (s *userService) ValidateToken(ctx context.Context, token string) (dto.User
 
 	err = json.Unmarshal(data, &user)
 	if err != nil {
+		component.Log.Errorf("ValidateToken(Unmarshal): token = %s: err = %s", token, err.Error())
 		return dto.UserData{}, err
 	}
 
@@ -89,6 +92,7 @@ func (s *userService) ValidateToken(ctx context.Context, token string) (dto.User
 func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dto.UserRegisterRes, error) {
 	exist, err := s.repository.FindByUsername(ctx, req.Username)
 	if err != nil {
+		component.Log.Errorf("Register(FindByUsername): username = %s: err = %s", req.Username, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
@@ -112,11 +116,13 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 
 	err = s.emailService.Send(req.Email, "OTP Code", "Your OTP Code are: "+otpCode)
 	if err != nil {
+		component.Log.Errorf("Register(Send): username = %s: err = %s", req.Username, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
 	err = s.repository.Insert(ctx, &user)
 	if err != nil {
+		component.Log.Errorf("Register(Insert): username = %s: err = %s", req.Username, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
@@ -127,6 +133,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 
 	err = s.factorRepository.Insert(ctx, &factor)
 	if err != nil {
+		component.Log.Errorf("Register(Insert): factor_user_id = %d: err = %s", factor.UserID, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
@@ -138,6 +145,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 
 	err = s.accountRepository.Create(ctx, account)
 	if err != nil {
+		component.Log.Errorf("Register(Create): user_id = %d: err = %s", user.ID, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
@@ -151,7 +159,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 func (s *userService) ValidateOTP(ctx context.Context, req dto.ValidateOtpReq) error {
 	data, err := s.cacheRepository.Get("otp:" + req.ReferenceID)
 	if err != nil {
-		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
+		component.Log.Error(fmt.Sprintf("ValidateOTP(Get): otp_reference_id = %s: err = %s", req.ReferenceID, err.Error()))
 		return domain.ErrOtpNotFound
 	}
 
@@ -162,12 +170,12 @@ func (s *userService) ValidateOTP(ctx context.Context, req dto.ValidateOtpReq) e
 
 	data, err = s.cacheRepository.Get("user-ref:" + req.ReferenceID)
 	if err != nil {
-		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
+		component.Log.Error(fmt.Sprintf("ValidateOTP(Get): user_ref_reference_id = %s: err = %s", req.ReferenceID, err.Error()))
 		return domain.ErrUsernameNotFound
 	}
 	user, err := s.repository.FindByUsername(ctx, string(data))
 	if err != nil {
-		component.Log.Error(fmt.Sprintf("ValidateOTP; %s", err.Error()))
+		component.Log.Error(fmt.Sprintf("ValidateOTP(FindByUsername): username = %s: err = %s", string(data), err.Error()))
 		return err
 	}
 

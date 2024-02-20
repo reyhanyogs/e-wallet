@@ -26,7 +26,7 @@ func (s *emailService) Send(to, subject, body string) error {
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
-		component.Log.Errorf("Send: %s", err.Error())
+		component.Log.Errorf("Send(Marshal): to = %s :err = %s", payload.To, err.Error())
 		return err
 	}
 
