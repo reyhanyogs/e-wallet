@@ -8,7 +8,7 @@ import (
 )
 
 func Get() *Config {
-	err := godotenv.Load()
+	err := godotenv.Load("main.env")
 	if err != nil {
 		log.Fatalf("error when load env %s", err.Error())
 	}
