@@ -25,7 +25,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - logs:/app
+      - logs:/app/logs
     environment:
       - DB_SOURCE=postgresql://postgres:postgres@postgres:5432/e-wallet?sslmode=disable
     ports:
@@ -33,6 +33,28 @@ services:
     depends_on:
       - postgres
       - redis
+    entrypoint: ["/app/wait-for", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/main"]
+  
+  app-scheduler:
+    image: e-wallet-scheduler:latest
+    volumes:
+      - logs:/app/logs
+    depends_on:
+      - app
+      - redis
+    ports:
+      - "8082:8082"
+  
+  app-queue:
+    image: e-wallet-queue:latest
+    volumes:
+      - logs:/app/logs
+    depends_on:
+      - app
+      - redis
+    ports:
+      - "8081:8081"
     entrypoint: ["/app/wait-for", "postgres:5432", "--", "/app/start.sh"]
     command: ["/app/main"]
   
