@@ -19,7 +19,7 @@ func NewTopUp(app *fiber.App, authMid fiber.Handler, topUpService domain.TopUpSe
 	app.Post("/topup/initialize", authMid, h.InitializeTopUp)
 }
 
-func (t *topUpApi) InitializeTopUp(ctx *fiber.Ctx) error {
+func (handler *topUpApi) InitializeTopUp(ctx *fiber.Ctx) error {
 	var req dto.TopUpReq
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(400).JSON(dto.Response{
@@ -30,7 +30,7 @@ func (t *topUpApi) InitializeTopUp(ctx *fiber.Ctx) error {
 	user := ctx.Locals("x-user").(dto.UserData)
 	req.UserID = user.ID
 
-	res, err := t.topUpService.InitializeTopUp(ctx.Context(), req)
+	res, err := handler.topUpService.InitializeTopUp(ctx.Context(), req)
 	if err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
 			Message: err.Error(),

@@ -21,12 +21,12 @@ func NewNotification(app *fiber.App, authMid fiber.Handler, notificationService 
 	app.Get("/notifications", authMid, h.GetUsersNotification)
 }
 
-func (h *notificationApi) GetUsersNotification(ctx *fiber.Ctx) error {
+func (handler *notificationApi) GetUsersNotification(ctx *fiber.Ctx) error {
 	c, cancel := context.WithTimeout(ctx.Context(), 15*time.Second)
 	defer cancel()
 
 	user := ctx.Locals("x-user").(dto.UserData)
-	notifications, err := h.notificationService.FindByUser(c, user.ID)
+	notifications, err := handler.notificationService.FindByUser(c, user.ID)
 	if err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
 			Message: err.Error(),

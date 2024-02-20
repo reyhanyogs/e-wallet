@@ -20,7 +20,7 @@ func NewMidtrans(app *fiber.App, midtransService domain.MidTransService, topUpSe
 	app.Post("/midtrans/payment-callback", h.paymentHandlerNotification)
 }
 
-func (h *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
+func (handler *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
 	var payload map[string]interface{}
 	if err := ctx.BodyParser(&payload); err != nil {
 		return ctx.Status(400).JSON(dto.Response{
@@ -35,7 +35,7 @@ func (h *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
 		})
 	}
 
-	success, err := h.midtransService.VerifyPayment(ctx.Context(), orderId)
+	success, err := handler.midtransService.VerifyPayment(ctx.Context(), orderId)
 	if err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
 			Message: err.Error(),
@@ -45,7 +45,7 @@ func (h *midtransApi) paymentHandlerNotification(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(500)
 	}
 
-	err = h.topUpService.ConfirmedTopUp(ctx.Context(), orderId)
+	err = handler.topUpService.ConfirmedTopUp(ctx.Context(), orderId)
 	if err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
 			Message: err.Error(),

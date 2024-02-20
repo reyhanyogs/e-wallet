@@ -22,7 +22,7 @@ func NewTransfer(app *fiber.App, authMid fiber.Handler, transactionService domai
 	app.Post("transfer/execute", authMid, h.TransferExecute)
 }
 
-func (h *transferApi) TransferInquiry(ctx *fiber.Ctx) error {
+func (handler *transferApi) TransferInquiry(ctx *fiber.Ctx) error {
 	var req dto.TransferInquiryReq
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(400).JSON(dto.Response{
@@ -30,7 +30,7 @@ func (h *transferApi) TransferInquiry(ctx *fiber.Ctx) error {
 		})
 	}
 
-	inquiry, err := h.transactionService.TransferInquiry(ctx.Context(), req)
+	inquiry, err := handler.transactionService.TransferInquiry(ctx.Context(), req)
 	if err != nil {
 		return ctx.Status(400).JSON(dto.Response{
 			Message: err.Error(),
@@ -40,7 +40,7 @@ func (h *transferApi) TransferInquiry(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(inquiry)
 }
 
-func (h *transferApi) TransferExecute(ctx *fiber.Ctx) error {
+func (handler *transferApi) TransferExecute(ctx *fiber.Ctx) error {
 	var req dto.TransferExecuteReq
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
@@ -50,7 +50,7 @@ func (h *transferApi) TransferExecute(ctx *fiber.Ctx) error {
 
 	user := ctx.Locals("x-user").(dto.UserData)
 
-	if err := h.factorService.ValidatePIN(ctx.Context(), dto.ValidatePinReq{
+	if err := handler.factorService.ValidatePIN(ctx.Context(), dto.ValidatePinReq{
 		UserID: user.ID,
 		PIN:    req.PIN,
 	}); err != nil {
@@ -59,7 +59,7 @@ func (h *transferApi) TransferExecute(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err := h.transactionService.TransferExecute(ctx.Context(), req)
+	err := handler.transactionService.TransferExecute(ctx.Context(), req)
 	if err != nil {
 		return ctx.Status(400).JSON(dto.Response{
 			Message: "invalid body",
