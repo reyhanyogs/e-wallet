@@ -14,18 +14,26 @@ import (
 )
 
 type userService struct {
-	repository       domain.UserRepository
-	cacheRepository  domain.CacheRepository
-	emailService     domain.EmailService
-	factorRepository domain.FactorRepository
+	repository        domain.UserRepository
+	cacheRepository   domain.CacheRepository
+	emailService      domain.EmailService
+	factorRepository  domain.FactorRepository
+	accountRepository domain.AccountRepository
 }
 
-func NewUser(repository domain.UserRepository, cacheRepository domain.CacheRepository, emailService domain.EmailService, factorRepository domain.FactorRepository) domain.UserService {
+func NewUser(
+	repository domain.UserRepository,
+	cacheRepository domain.CacheRepository,
+	emailService domain.EmailService,
+	factorRepository domain.FactorRepository,
+	accountRepository domain.AccountRepository,
+) domain.UserService {
 	return &userService{
-		repository:       repository,
-		cacheRepository:  cacheRepository,
-		emailService:     emailService,
-		factorRepository: factorRepository,
+		repository:        repository,
+		cacheRepository:   cacheRepository,
+		emailService:      emailService,
+		factorRepository:  factorRepository,
+		accountRepository: accountRepository,
 	}
 }
 
@@ -118,6 +126,17 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 	}
 
 	err = s.factorRepository.Insert(ctx, &factor)
+	if err != nil {
+		return dto.UserRegisterRes{}, err
+	}
+
+	account := &domain.Account{
+		UserId:        user.ID,
+		AccountNumber: util.GenerateRandomNumber(12),
+		Balance:       0,
+	}
+
+	err = s.accountRepository.Create(ctx, account)
 	if err != nil {
 		return dto.UserRegisterRes{}, err
 	}

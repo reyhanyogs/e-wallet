@@ -18,6 +18,16 @@ func NewAccount(conn *sql.DB) domain.AccountRepository {
 	}
 }
 
+func (r *accountRepository) Create(ctx context.Context, account *domain.Account) error {
+	executor := r.db.Insert("accounts").Rows(goqu.Record{
+		"user_id":        account.UserId,
+		"account_number": account.AccountNumber,
+		"balance":        account.Balance,
+	}).Returning("id").Executor()
+	_, err := executor.ScanStructContext(ctx, account)
+	return err
+}
+
 func (r *accountRepository) FindByUserID(ctx context.Context, id int64) (account domain.Account, err error) {
 	dataset := r.db.From("accounts").Where(goqu.Ex{
 		"user_id": id,

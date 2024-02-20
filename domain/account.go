@@ -10,6 +10,7 @@ type Account struct {
 }
 
 type AccountRepository interface {
+	Create(ctx context.Context, account *Account) error
 	FindByUserID(ctx context.Context, id int64) (Account, error)
 	FindByAccountNumber(ctx context.Context, accNumber string) (Account, error)
 	Update(ctx context.Context, account *Account) error

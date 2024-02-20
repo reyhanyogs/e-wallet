@@ -32,7 +32,7 @@ func main() {
 
 	queueService := service.NewQueue(config)
 	emailService := service.NewEmail(queueService)
-	userService := service.NewUser(userRepository, cacheConnection, emailService, factorRepository)
+	userService := service.NewUser(userRepository, cacheConnection, emailService, factorRepository, accountRepository)
 	notificationService := service.NewNotification(notificationRepository, templateRepository, hub)
 	transactionService := service.NewTransaction(accountRepository, transactionRepository, cacheConnection, notificationService)
 	midtransService := service.NewMidtrans(config)
