@@ -54,12 +54,16 @@ func (handler *authApi) ValidateToken(ctx *fiber.Ctx) error {
 func (handler *authApi) RegisterUser(ctx *fiber.Ctx) error {
 	var req dto.UserRegisterReq
 	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.SendStatus(400)
+		return ctx.Status(400).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 
 	res, err := handler.userService.Register(ctx.Context(), req)
 	if err != nil {
-		return ctx.Status(util.GetHttpStatus(err)).SendString(err.Error())
+		return ctx.Status(util.GetHttpStatus(err)).JSON(dto.Response{
+			Message: err.Error(),
+		})
 	}
 	return ctx.Status(200).JSON(res)
 }
