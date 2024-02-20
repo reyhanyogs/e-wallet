@@ -28,7 +28,9 @@ filebeat.inputs:
 
     # Paths that should be crawled and fetched. Glob based paths.
     paths:
-      - /usr/share/filebeat/logs/logrus.log
+      - /usr/share/filebeat/logs/e-wallet-main.log
+      - /usr/share/filebeat/logs/e-wallet-queue.log
+      - /usr/share/filebeat/logs/e-wallet-scheduler.log
       #- /var/log/*.log
       #- c:\programdata\elasticsearch\logs\*
 
