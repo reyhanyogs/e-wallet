@@ -30,7 +30,7 @@ func (s *ipCheckerService) Query(ctx context.Context, ip string) (checker dto.Ip
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		component.Log.Errorf("Query(Get): IP = %s: err = %s", ip, err.Error())
+		component.Log.Errorf("Query(ReadAll): IP = %s: err = %s", ip, err.Error())
 		return dto.IpChecker{}, err
 	}
 

@@ -88,7 +88,7 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 
 	dofAccount, err := s.accountRepository.FindByAccountNumber(ctx, reqInq.AccountNumber)
 	if err != nil {
-		component.Log.Errorf("TransferExecute(FindByAccountNumber): user_id = %d: err = %s", dofAccount.ID, err.Error())
+		component.Log.Errorf("TransferExecute(FindByAccountNumber): account_number = %s: err = %s", reqInq.AccountNumber, err.Error())
 		return err
 	}
 
@@ -102,7 +102,7 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 	}
 	err = s.transactionRepository.Insert(ctx, &debitTransaction)
 	if err != nil {
-		component.Log.Errorf("TransferExecute(Insert): user_id = %d: err = %s", debitTransaction.ID, err.Error())
+		component.Log.Errorf("TransferExecute(Insert): debit_transaction_account_id = %d: err = %s", debitTransaction.AccountId, err.Error())
 		return err
 	}
 
@@ -116,7 +116,7 @@ func (s *transactionService) TransferExecute(ctx context.Context, req dto.Transf
 	}
 	err = s.transactionRepository.Insert(ctx, &creditTransaction)
 	if err != nil {
-		component.Log.Errorf("TransferExecute(Insert): user_id = %d: err = %s", creditTransaction.ID, err.Error())
+		component.Log.Errorf("TransferExecute(Insert): credit_transaction_account_id = %d: err = %s", creditTransaction.AccountId, err.Error())
 		return err
 	}
 

@@ -116,7 +116,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterReq) (dt
 
 	err = s.emailService.Send(req.Email, "OTP Code", "Your OTP Code are: "+otpCode)
 	if err != nil {
-		component.Log.Errorf("Register(Send): username = %s: err = %s", req.Username, err.Error())
+		component.Log.Errorf("Register(Send): email = %s: err = %s", req.Email, err.Error())
 		return dto.UserRegisterRes{}, err
 	}
 
