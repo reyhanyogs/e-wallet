@@ -17,17 +17,20 @@ Before you begin, ensure you have met the following requirements:
 
 ## How to Run the Application
 1. First, build the docker image of [E-Wallet-Queue](https://github.com/reyhanyogs/e-wallet-queue) and [E-Wallet-Scheduler](https://github.com/reyhanyogs/e-wallet-scheduler).
-
-2. Then, build docker-compose.yaml using:
-
-```bash
-make composeup
-```
-
-3. After all services are running, use http://localhost:8080 to access the API.
+2. Insert your Midtrans key in ```main.env```
+3. Then, build docker-compose.yaml using:
+   ```bash
+   make composeup
+   ```
+4. After all services are running, use http://localhost:8080 to access the API.
 
 ## Logging and Monitoring
 To access the centralized logging system:
 1. Navigate to Kibana at http://localhost:5601.
-2. Configure the index pattern for Elasticsearch.
-3. Explore the logs for the main e-wallet system, e-wallet-queue, and e-wallet-scheduler.
+2. Log in to Kibana using the following credentials
+   ```bash
+   kibana
+   Nqy0fHREsStfASF
+   ```
+4. Configure the index pattern for Elasticsearch.
+5. Explore the logs for the main e-wallet system, e-wallet-queue, and e-wallet-scheduler.
